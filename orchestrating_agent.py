@@ -1,10 +1,10 @@
 class HealthcareOrchestrator:
     def __init__(self, appointment_agents, record_agents, insurance_agents, knowledge_agent):
         # Each domain has (planner, executor)
-        self.app_planner, self.app_executor = appointment_agents
+        #self.app_planner, self.app_executor = appointment_agents
         self.rec_planner, self.rec_executor = record_agents
-        self.ins_planner, self.ins_executor = insurance_agents
-        self.knowledge = knowledge_agent
+        #self.ins_planner, self.ins_executor = insurance_agents
+        #self.knowledge = knowledge_agent
 
     def handle_request(self, query: str) -> str:
         """
@@ -23,8 +23,10 @@ class HealthcareOrchestrator:
             return self.ins_executor.get_plan_details(plan_id)
 
         #!!!currently only gives a single response to the input, should start a chatbot conversation instead.!!! NEEDS WORK
-        elif query == "knowledge":
-            question =
+        #elif query == "knowledge":
+        #    question =
 
         else:
             return "Invalid selection. Choose 'appointment', 'record', or 'insurance'."
+
+orchestrator = HealthcareOrchestrator(record_agents = [MedicalPlannerAgent("AIzaSyDQPg7tdLypaVJOEMV2yQzNi8M30TUjTWg"), ])
