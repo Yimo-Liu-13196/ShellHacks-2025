@@ -1,0 +1,195 @@
+project:
+  name: HealthcareLoop
+  version: 1
+  description: |
+    HealthcareLoop orchestrates scheduling, insurance, and medical-record workflows
+    while still fielding general health questions. The Agent Builder deployment wraps
+    planner/executor microservices that already exist in this repo, and delegates
+    free-form guidance to a model action.
+  variables:
+    PLANNER_BASE_URL: "${PLANNER_BASE_URL:-https://planner.service.local}"
+    EXECUTOR_BASE_URL: "${EXECUTOR_BASE_URL:-https://executor.service.local}"
+    GENERAL_SERVICE_BASE_URL: "${GENERAL_SERVICE_BASE_URL:-https://general.service.local}"
+    GENERAL_AGENT_PROVIDER: "${GENERAL_AGENT_PROVIDER:-gemini}"
+    GENERAL_AGENT_MODEL: "${GENERAL_AGENT_MODEL:-gemini-1.5-flash}"
+    OPENROUTER_MODEL: "${OPENROUTER_MODEL:-openrouter/x-ai/grok-4-fast:free}"
+    OPENROUTER_API_KEY: "${OPENROUTER_API_KEY:-}"
+    OPENROUTER_SITE_URL: "${OPENROUTER_SITE_URL:-https://your-app.example.com}"
+
+intents:
+  - name: schedule_appointment
+    description: Help a patient find and book an appointment slot.
+    trigger_phrases:
+      - "schedule appointment"
+      - "book doctor"
+    planner_action:
+      name: schedule_appointment_planner
+      type: rest
+      method: POST
+      url: "${PLANNER_BASE_URL}/plan/appointment"
+      request:
+        headers:
+          Content-Type: application/json
+        json:
+          intent: schedule_appointment
+          utterance: "${request.query}"
+          context: "${request.context}"
+      response:
+        success_condition: "$.task != null and $.confidence != null"
+        schema:
+          task: "$.task"
+          confidence: "$.confidence"
+          payload: "$.payload"
+    executor_action:
+      name: schedule_appointment_executor
+      type: rest
+      method: POST
+      url: "${EXECUTOR_BASE_URL}/execute/appointment"
+      request:
+        headers:
+          Content-Type: application/json
+        json:
+          task: "${planner.task}"
+          payload: "${planner.payload}"
+      response:
+        success_path: "$.success"
+        schema:
+          success: "$.success"
+          reference_id: "$.reference_id"
+          message: "$.message"
+
+  - name: check_insurance
+    description: Confirm insurance eligibility or plan details.
+    trigger_phrases:
+      - "check insurance"
+      - "insurance benefits"
+    planner_action:
+      name: check_insurance_planner
+      type: rest
+      method: POST
+      url: "${PLANNER_BASE_URL}/plan/insurance"
+      request:
+        headers:
+          Content-Type: application/json
+        json:
+          intent: check_insurance
+          utterance: "${request.query}"
+          context: "${request.context}"
+      response:
+        success_condition: "$.task != null and $.confidence != null"
+        schema:
+          task: "$.task"
+          confidence: "$.confidence"
+          payload: "$.payload"
+    executor_action:
+      name: check_insurance_executor
+      type: rest
+      method: POST
+      url: "${EXECUTOR_BASE_URL}/execute/insurance"
+      request:
+        headers:
+          Content-Type: application/json
+        json:
+          task: "${planner.task}"
+          payload: "${planner.payload}"
+      response:
+        success_path: "$.success"
+        schema:
+          success: "$.success"
+          reference_id: "$.reference_id"
+          message: "$.message"
+
+  - name: access_medical_record
+    description: Retrieve medical records for a patient or visit.
+    trigger_phrases:
+      - "medical record"
+      - "view chart"
+    planner_action:
+      name: access_medical_record_planner
+      type: rest
+      method: POST
+      url: "${PLANNER_BASE_URL}/plan/medical-record"
+      request:
+        headers:
+          Content-Type: application/json
+        json:
+          intent: access_medical_record
+          utterance: "${request.query}"
+          context: "${request.context}"
+      response:
+        success_condition: "$.task != null and $.confidence != null"
+        schema:
+          task: "$.task"
+          confidence: "$.confidence"
+          payload: "$.payload"
+    executor_action:
+      name: access_medical_record_executor
+      type: rest
+      method: POST
+      url: "${EXECUTOR_BASE_URL}/execute/medical-record"
+      request:
+        headers:
+          Content-Type: application/json
+        json:
+          task: "${planner.task}"
+          payload: "${planner.payload}"
+      response:
+        success_path: "$.success"
+        schema:
+          success: "$.success"
+          reference_id: "$.reference_id"
+          message: "$.message"
+
+  - name: general_health_question
+    description: Provide compliant, non-diagnostic health guidance.
+    trigger_phrases:
+      - "general health question"
+      - "health advice"
+    model_action:
+      selector: "${GENERAL_AGENT_PROVIDER}"
+      options:
+        gemini:
+          provider: gemini
+          model: "${GENERAL_AGENT_MODEL}"
+          input_mapping:
+            prompt: "${request.query}"
+            context: "${request.context}"
+          output_mapping:
+            answer: "$.candidates[0].content[0].text"
+        openrouter:
+          type: rest
+          method: POST
+          url: "https://openrouter.ai/api/v1/chat/completions"
+          request:
+            headers:
+              Content-Type: application/json
+              Authorization: "Bearer ${OPENROUTER_API_KEY}"
+              HTTP-Referer: "${OPENROUTER_SITE_URL}"
+              X-Title: HealthcareLoop-Agent
+            json:
+              model: "${OPENROUTER_MODEL}"
+              messages:
+                - role: system
+                  content: "You are a helpful healthcare support assistant providing general, non-diagnostic guidance."
+                - role: user
+                  content: "${request.query}\n\nContext: ${request.context}"
+          response:
+            success_condition: "$.choices[0].message.content != null"
+            schema:
+              answer: "$.choices[0].message.content"
+              finish_reason: "$.choices[0].finish_reason"
+        internal_rest:
+          type: rest
+          method: POST
+          url: "${GENERAL_SERVICE_BASE_URL}/chat"
+          request:
+            headers:
+              Content-Type: application/json
+            json:
+              question: "${request.query}"
+              context: "${request.context}"
+          response:
+            success_path: "$.success"
+            schema:
+              answer: "$.message"
+              citations: "$.citations"

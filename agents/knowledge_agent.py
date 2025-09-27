@@ -1,30 +1,38 @@
+from __future__ import annotations
+
+from typing import Callable
+
+from google.adk.agents import Agent
+
+from .general_health_agent import build_general_health_agent
+
+
 class KnowledgeAgent:
-    def __init__(self, llm_model, escalation_callback):
-        self.llm_model = llm_model
-        self.escalation_callback = escalation_callback  # e.g., send Slack/email
+    def __init__(
+        self,
+        agent: Agent | None = None,
+        escalation_callback: Callable[[str, str], None] | None = None,
+    ) -> None:
+        self.agent = agent or build_general_health_agent()
+        self.escalation_callback = escalation_callback or escalate_to_human
 
-    def get_general_advice(self, query: str) -> str:
-        """
-        Provide general medical guidance. Escalate if unsafe or uncertain.
-        """
-        # Step 1: Ask LLM for advice
-        response = self.llm_model.generate_response(
-            query,
-            instruction="Answer with very general health guidance only. Do not give personal medical advice. Escalate if unsure."
-        )
+    def get_general_advice(self, query: str, context: str | None = None) -> str:
+        """Provide general medical guidance with basic guardrails."""
+        prompt = query if not context else f"{query}\n\nContext: {context}"
+        response = self.agent.respond(prompt)
+        text = getattr(response, "text", str(response))
 
-        # Step 2: Simple guardrails
         unsafe_keywords = ["chest pain", "seizure", "shortness of breath", "suicidal"]
         if any(word in query.lower() for word in unsafe_keywords):
-            self.escalation_callback(query, reason="Emergency keyword detected")
-            return "This sounds urgent. I am escalating to a human healthcare provider."
+            self.escalation_callback(query, "Emergency keyword detected")
+            return "This sounds urgent. I'm escalating your request to a healthcare professional."
 
-        if "I don't know" in response or "unsure" in response.lower():
-            self.escalation_callback(query, reason="LLM uncertainty")
-            return "I'm not certain about this question. A healthcare professional will assist you shortly."
+        if "i don't know" in text.lower() or "unsure" in text.lower():
+            self.escalation_callback(query, "LLM uncertainty")
+            return "I'm not certain about this. A healthcare professional will assist you shortly."
 
-        # Step 3: Return safe, general response
-        return response
+        return text
 
-def escalate_to_human(query, reason):
+
+def escalate_to_human(query: str, reason: str) -> None:
     print(f"[ESCALATION] {reason} → Human needed for: {query}")
