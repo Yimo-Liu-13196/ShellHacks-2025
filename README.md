@@ -1,5 +1,8 @@
 # HealthcareLoop Agent Builder
 
+Project Prompt: ShellHacks Healthcare Agent System
+We are building a hackathon demo for Google Cloud’s Autonomous AI Agent Challenge. The solution must use Agent Builder (ADK) and highlight both a continuous supervision loop and parallel planner agents. Our domain: healthcare support with four user-facing capabilities—appointment scheduling, insurance lookup, medical records retrieval, and a general health Q&A chatbot.
+
 The `healthcare_loop.adk.yaml` file defines the Agent Builder project **HealthcareLoop**. It wires
 planner/executor REST actions for scheduling, insurance, and medical-record workflows, and exposes a
 model action for general health questions. Point the variables at the services contained in this repo
@@ -23,3 +26,8 @@ Set these variables (or edit the defaults in the YAML) before deploying:
 A minimal OpenRouter setup that runs entirely through Google ADK is shown in
 `agents/general_health_agent.py`. It instantiates `google.adk.agents.Agent` with the `LiteLlm` bridge
 for the `openrouter/x-ai/grok-4-fast:free` model.
+
+## Local Secrets
+- Copy `.env.example` to `.env` and keep the `OPENROUTER_API_KEY` placeholder set to `Murilinhos key`
+  until you are ready to swap in the real value. The `.env` file is ignored by Git so the secret
+  never leaves your machine.

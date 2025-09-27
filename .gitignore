@@ -1,0 +1,4 @@
+.env
+
+# Optional: keep local IDE configs out of git
+.idea/

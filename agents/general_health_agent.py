@@ -6,7 +6,7 @@ from google.adk.models.lite_llm import LiteLlm
 def build_general_health_agent() -> Agent:
     model = LiteLlm(
         model=os.getenv("OPENROUTER_MODEL", "openrouter/x-ai/grok-4-fast:free"),
-        api_key=os.getenv("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"),
+        api_key=os.getenv("OPENROUTER_API_KEY"),
     )
     return Agent(
         model=model,

@@ -6,7 +6,7 @@ class HealthcareOrchestrator:
         self.ins_planner, self.ins_executor = insurance_agents
         self.knowledge = knowledge_agent
 
-    def handle_request(self, query: str) -> str:
+    def handle_request(self, query) -> str:
         """
         Route request based on explicit selection string instead of parsing sentences.
         """
@@ -22,9 +22,18 @@ class HealthcareOrchestrator:
             plan_id = self.ins_planner.find_plan_id()
             return self.ins_executor.get_plan_details(plan_id)
 
-        #!!!currently only gives a single response to the input, should start a chatbot conversation instead.!!! NEEDS WORK
-        elif query == "knowledge":
-            question =
+        elif isinstance(query, dict) and query.get("type") == "knowledge":
+            question = query.get("question")
+            context = query.get("context")
+            if not question:
+                return "Knowledge requests must include a question."
+            return self.knowledge.get_general_advice(question, context)
+
+        elif isinstance(query, str) and query.startswith("knowledge:"):
+            question = query.split(":", 1)[1].strip()
+            if not question:
+                return "Provide a general health question after 'knowledge:'."
+            return self.knowledge.get_general_advice(question)
 
         else:
             return "Invalid selection. Choose 'appointment', 'record', or 'insurance'."
