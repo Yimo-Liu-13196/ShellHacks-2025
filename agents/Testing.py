@@ -26,9 +26,9 @@ for r in full_data:
     r['Fields'] = [f.strip() for f in r['Fields'].split(',')]
 
 # --- Step 2: Initialize planner agent ---
-planner = MedicalPlannerAgent(api_key="AIzaSyDQPg7tdLypaVJOEMV2yQzNi8M30TUjTWg")
-insurance = InsurancePlannerAgent(api_key="AIzaSyDQPg7tdLypaVJOEMV2yQzNi8M30TUjTWg")
-appointment = AppointmentPlannerAgent(api_key="AIzaSyDQPg7tdLypaVJOEMV2yQzNi8M30TUjTWg")
+planner = MedicalPlannerAgent(api_key="MY_API_KEY")
+insurance = InsurancePlannerAgent(api_key="MY_API_KEY")
+appointment = AppointmentPlannerAgent(api_key="MY_API_KEY")
 
 # --- Step 3: Test queries ---
 test_queries = [
