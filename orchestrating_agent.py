@@ -29,4 +29,4 @@ class HealthcareOrchestrator:
         else:
             return "Invalid selection. Choose 'appointment', 'record', or 'insurance'."
 
-orchestrator = HealthcareOrchestrator(record_agents = [MedicalPlannerAgent("AIzaSyDQPg7tdLypaVJOEMV2yQzNi8M30TUjTWg"), ])
+orchestrator = HealthcareOrchestrator(record_agents = [MedicalPlannerAgent("MY_API_KEY"), ])
