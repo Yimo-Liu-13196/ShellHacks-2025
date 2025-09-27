@@ -31,3 +31,22 @@ for the `openrouter/x-ai/grok-4-fast:free` model.
 - Copy `.env.example` to `.env` and keep the `OPENROUTER_API_KEY` placeholder set to `Murilinhos key`
   until you are ready to swap in the real value. The `.env` file is ignored by Git so the secret
   never leaves your machine.
+
+## Run the API
+- Install dependencies with `pip install -r requirements.txt` (use a virtualenv).
+- Load environment variables: `cp .env.example .env` and update `OPENROUTER_API_KEY`, then `source .env`.
+- Start the service: `uvicorn api.main:app --reload`. The API listens on `http://localhost:8000` with
+  endpoints at `/api/appointment/schedule`, `/api/insurance/check`, `/api/records/access`, and `/api/knowledge`.
+
+## Run the Frontend
+- Serve the static assets in `frontend/` using any web server, e.g. 
+  `python -m http.server --directory frontend 5173`.
+- Set `window.API_BASE_URL` in the browser console (or host via a bundler that injects
+  `VITE_API_BASE_URL`) so the UI knows where your API lives.
+- Use the four panels to exercise each workflow. Results appear in the console panes beneath each form.
+
+## Docker Compose
+- Build and start both services with `docker compose up --build`.
+- Visit `http://localhost:5173` for the frontend; it proxies API calls to `http://localhost:8000`.
+- Stop the stack with `docker compose down`. Customize the exposed ports or `API_BASE_URL` via
+  environment variables before running compose if you deploy remotely.

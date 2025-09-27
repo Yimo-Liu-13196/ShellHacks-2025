@@ -3,18 +3,21 @@ from google.adk.agents import Agent
 from google.adk.models.lite_llm import LiteLlm
 
 
+SYSTEM_INSTRUCTION = (
+    "You are HealthcareLoop's general health assistant. Offer friendly,"
+    " non-diagnostic guidance and encourage users to contact clinicians"
+    " for medical decisions."
+)
+
+
 def build_general_health_agent() -> Agent:
     model = LiteLlm(
         model=os.getenv("OPENROUTER_MODEL", "openrouter/x-ai/grok-4-fast:free"),
         api_key=os.getenv("OPENROUTER_API_KEY"),
     )
     return Agent(
+        name="general_health",
         model=model,
-        system_instruction=(
-            "You are HealthcareLoop's general health assistant. Offer friendly,"
-            " non-diagnostic guidance and encourage users to contact clinicians"
-            " for medical decisions."
-        ),
     )
 
 

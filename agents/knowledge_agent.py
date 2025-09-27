@@ -4,7 +4,7 @@ from typing import Callable
 
 from google.adk.agents import Agent
 
-from .general_health_agent import build_general_health_agent
+from .general_health_agent import SYSTEM_INSTRUCTION, build_general_health_agent
 
 
 class KnowledgeAgent:
@@ -18,7 +18,9 @@ class KnowledgeAgent:
 
     def get_general_advice(self, query: str, context: str | None = None) -> str:
         """Provide general medical guidance with basic guardrails."""
-        prompt = query if not context else f"{query}\n\nContext: {context}"
+        header = SYSTEM_INSTRUCTION
+        body = query if not context else f"{query}\n\nContext: {context}"
+        prompt = f"{header}\n\nUser query: {body}"
         response = self.agent.respond(prompt)
         text = getattr(response, "text", str(response))
 

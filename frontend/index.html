@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HealthcareLoop Console</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>HealthcareLoop Console</h1>
+      <p>Interact with scheduling, insurance, medical-record, and knowledge agents from one place.</p>
+    </header>
+
+    <main>
+      <section>
+        <h2>Schedule Appointment</h2>
+        <form id="appointment-form">
+          <label>
+            Doctor Type
+            <input type="text" name="doctor_type" placeholder="Cardiologist" required />
+          </label>
+          <label>
+            Preferred Days (comma separated)
+            <input type="text" name="preferred_days" placeholder="Monday, Wednesday" required />
+          </label>
+          <label>
+            Patient Name
+            <input type="text" name="patient_name" placeholder="Jordan Miles" required />
+          </label>
+          <label>
+            Patient Email
+            <input type="email" name="patient_email" placeholder="jordan@example.com" required />
+          </label>
+          <button type="submit">Schedule</button>
+        </form>
+        <pre id="appointment-result" class="result"></pre>
+      </section>
+
+      <section>
+        <h2>Check Insurance</h2>
+        <form id="insurance-form">
+          <label>
+            Query
+            <input type="text" name="query" placeholder="MetroHealth Silver Plus" required />
+          </label>
+          <button type="submit">Check Plan</button>
+        </form>
+        <pre id="insurance-result" class="result"></pre>
+      </section>
+
+      <section>
+        <h2>Access Medical Record</h2>
+        <form id="records-form">
+          <label>
+            Query
+            <input type="text" name="query" placeholder="Show me Dana Lee's latest record" required />
+          </label>
+          <button type="submit">Fetch Record</button>
+        </form>
+        <pre id="records-result" class="result"></pre>
+      </section>
+
+      <section>
+        <h2>Ask General Health Question</h2>
+        <form id="knowledge-form">
+          <label>
+            Question
+            <textarea name="question" placeholder="How can I sleep better?" required></textarea>
+          </label>
+          <label>
+            Optional Context
+            <textarea name="context" placeholder="User is 45 with mild hypertension."></textarea>
+          </label>
+          <button type="submit">Ask</button>
+        </form>
+        <pre id="knowledge-result" class="result"></pre>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        Configure API origin via <code>VITE_API_BASE_URL</code> or set <code>window.API_BASE_URL</code>
+        before loading this page.
+      </p>
+    </footer>
+
+    <script>
+      window.API_BASE_URL = window.API_BASE_URL || '__API_BASE_URL__';
+    </script>
+    <script src="app.js"></script>
+    <script>
+      if (window.API_BASE_URL === '__API_BASE_URL__') {
+        window.API_BASE_URL = 'http://localhost:8000';
+      }
+    </script>
+  </body>
+</html>

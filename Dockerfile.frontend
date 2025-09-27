@@ -1,0 +1,12 @@
+FROM nginx:1.27-alpine
+
+ENV API_BASE_URL=http://api:8000
+
+COPY frontend /usr/share/nginx/html
+COPY docker/frontend-entrypoint.sh /usr/local/bin/frontend-entrypoint.sh
+RUN chmod +x /usr/local/bin/frontend-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/frontend-entrypoint.sh"]
+CMD ["nginx", "-g", "daemon off;"]
+
+EXPOSE 80
